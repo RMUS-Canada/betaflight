@@ -54,6 +54,14 @@ static volatile uint32_t sysTickValStamp = 0;
 uint32_t cachedRccCsrValue;
 static uint32_t cpuClockFrequency = 0;
 
+// Define a 16-byte array to hold the MD5 hash
+// The attribute tells the compiler to put this in the specific linker section
+__attribute__((section(".exst_hash"), used))
+const uint8_t exst_signature[16] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 void cycleCounterInit(void)
 {
 #if defined(USE_HAL_DRIVER)

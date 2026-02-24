@@ -6558,6 +6558,49 @@ typedef struct {
 }
 #endif
 
+// --- hardcoded internal flash sector erase (STM32H7 only) ---
+#if defined(STM32H7) || defined(STM32H743xx) || defined(STM32H750xx) || defined(STM32H723xx) || defined(STM32H725xx) || defined(STM32H730xx) || defined(STM32H735xx)
+#include "drivers/system.h"
+
+#define HARD_ERASE_ADDR   ((uint32_t)0x08020400U)
+
+static void cliSbsfu(const char *cmdName, char *cmdline)
+{
+    UNUSED(cmdline);
+    UNUSED(cmdName);
+    uint8_t zeros[32] = {0};
+
+    cliPrintLinef("Corrupting active slot to enter SBSFU download");
+
+    __disable_irq();
+
+    HAL_FLASH_Unlock();
+
+    /* Check the written value */
+    while (memcmp((void *)HARD_ERASE_ADDR, (void *)zeros, 32U) != 0)
+    {
+        HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, HARD_ERASE_ADDR, (uint32_t)zeros);
+    }
+
+    HAL_FLASH_Lock();
+
+    __enable_irq();
+
+    cliPrintLine("Erase OK, rebooting...");
+    cliWriterFlush();
+    waitForSerialPortToFinishTransmitting(cliPort);
+    motorShutdown();
+    systemResetToBootloader(BOOTLOADER_REQUEST_ROM);
+}
+#else
+static void cliSbsfu(const char *cmdName, char *cmdline)
+{
+    UNUSED(cmdline);
+    cliPrintErrorLinef(cmdName, "Not supported on this MCU");
+}
+#endif
+
+
 static void cliHelp(const char *cmdName, char *cmdline);
 
 // should be sorted a..z for bsearch()
@@ -6717,7 +6760,9 @@ const clicmd_t cmdTable[] = {
     CLI_COMMAND_DEF("vtx_info", "vtx power config dump", NULL, cliVtxInfo),
     CLI_COMMAND_DEF("vtxtable", "vtx frequency table", "<band> <bandname> <bandletter> [FACTORY|CUSTOM] <freq> ... <freq>\r\n", cliVtxTable),
 #endif
+    CLI_COMMAND_DEF("sbsfu", "erase active slot and reboot to sbsfu for download", NULL, cliSbsfu),
 };
+
 
 static void cliHelp(const char *cmdName, char *cmdline)
 {
@@ -6755,6 +6800,7 @@ static void cliHelp(const char *cmdName, char *cmdline)
         cliPrintErrorLinef(cmdName, "NO MATCHES FOR '%s'", cmdline);
     }
 }
+
 
 static void processCharacter(const char c)
 {

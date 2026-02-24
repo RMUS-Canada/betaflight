@@ -116,10 +116,12 @@ DEVICE_FLAGS    = -DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER
 #
 ifeq ($(TARGET_MCU),STM32H743xx)
 DEVICE_FLAGS       += -DSTM32H743xx
-DEFAULT_LD_SCRIPT   = $(LINKER_DIR)/stm32_flash_h743_2m.ld
+#DEFAULT_LD_SCRIPT   = $(LINKER_DIR)/stm32_flash_h743_2m.ld
+DEFAULT_LD_SCRIPT   = $(LINKER_DIR)/stm32_flash_h743_2m_sbsfu_betaflight_compat.ld
 STARTUP_SRC         = STM32/startup/startup_stm32h743xx.s
 MCU_FLASH_SIZE     := 2048
 DEVICE_FLAGS       += -DMAX_MPU_REGIONS=16
+FIRMWARE_SIZE      := 600
 
 ifeq ($(RAM_BASED),yes)
 FIRMWARE_SIZE      := 448

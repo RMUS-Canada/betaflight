@@ -723,7 +723,7 @@ static void initialiseD2MemorySections(void)
 
 void SystemInit (void)
 {
-    memProtReset();
+    //memProtReset();
 
     initialiseMemorySections();
 
@@ -859,7 +859,7 @@ void SystemInit (void)
 
     // Configure MPU
 
-    memProtConfigure(mpuRegions, mpuRegionCount);
+    //memProtConfigure(mpuRegions, mpuRegionCount);
 
     // Enable CPU L1-Cache
     SCB_EnableICache();
